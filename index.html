@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description" content="">
+    <meta name="author" content="Sreeraj">
+
+    <title>Aslrp Cricket</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/jasny-bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/navmenu-reveal.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap-multiselect.css" type="text/css"/>
+    
+
+  </head>
+
+  <body>
+    <div class="navmenu navmenu-default navmenu-fixed-left">
+      <a class="navmenu-brand" href="#">ASLRP Cricket</a>
+      <ul class="nav navmenu-nav">
+        <li class="leftMenuItem active" id="menu_players" item="players"><a>Players</a></li>
+        <li class="leftMenuItem" id="menu_matches" item="matches"><a>Matches</a></li>
+		
+    </div>
+
+    <div class="canvas">
+      <div class="navbar navbar-default navbar-fixed-top">
+        <button type="button" id="id_slide_button" class="navbar-toggle" data-toggle="offcanvas" data-recalc="false" data-target=".navmenu" data-canvas=".canvas">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+
+      <div class="container pageItem" id="players">
+        <div class="page-header">
+          <h1>Players</h1>
+        </div>
+        <div class="table-responsive">
+         <table class="table table-striped">
+			<thead>
+			  <tr>
+				<th>SI</th>
+				<th>User Id</th>
+				<th>Name</th>
+				<th></th>
+			  </tr>
+			</thead>
+			<tbody id="id_player_container">
+			  
+			</tbody>
+		 </table>
+		 </div>
+		<div>
+			<div class="form-group">
+			  <label for="id_user_name">Name:</label>
+			  <input type="text" class="form-control" id="id_user_name">
+			</div>
+			<div class="form-group">
+			  <label for="id_user_id">user Id:</label>
+			  <input type="text" class="form-control" id="id_user_id">
+			</div>
+			<button type="button" id="id_btn_new_player" class="btn btn-primary">Add Player</button>
+		</div>
+      </div>
+    
+    <div class="cls_layer_drama">
+    
+    <img id="id_img_drama_layer" src="images/golden_duck.gif">
+    <div id = "id_str_drama_layer"></div>
+    
+    </div>
+    <div class="container pageItem" id="match_score_card">
+        <div class="page-header">
+          <h3>Score card : <span id="id_scorecard_match_name"></span></h3>
+        </div>
+        
+        <div style="padding-top: 5px;" class="dropdown form-group scoreDrpGroup">
+		  <strong id="id_score_card_current_team"></strong>
+		</div>
+		
+		<div class="clearfix"></div>
+		<div>
+        <div style="margin-top: 5px;" class="dropdown form-group scoreDrpGroup">
+		  <button class="btn btn-primary dropdown-toggle cls_scorecard_innings_btn btn-xs" value="" type="button" data-toggle="dropdown">
+			  <span>Innings</span>
+		  <span class="caret"></span></button>
+		  <ul class="dropdown-menu cls_scorecard_innings">
+			<li><a href="#">1</a></li>
+			<li><a href="#">2</a></li>
+		  </ul>
+		</div>
+
+        <div style="margin-top: 5px;" class="dropdown form-group scoreDrpGroup">
+		  <button class="btn btn-primary dropdown-toggle cls_scorecard_overs_btn btn-xs" value="" type="button" data-toggle="dropdown">
+			  <span>Overs</span>
+		  <span class="caret"></span></button>
+		  <ul class="dropdown-menu cls_scorecard_overs">
+			
+		  </ul>
+		</div>
+		
+		<div class="dropdown form-group scoreDrpGroup">
+		  <button type="button" id="id_btn_first_ball" class="btn btn-success btn-circle cls_btn_over_navigators"><i class="glyphicon glyphicon-fast-backward"></i></button>
+		  <button type="button" id="id_btn_previous_ball" class="btn btn-success btn-circle cls_btn_over_navigators"><i class="glyphicon glyphicon-step-backward"></i></button>
+		  <button type="button" id="id_btn_next_ball" class="btn btn-success btn-circle cls_btn_over_navigators"><i class="glyphicon glyphicon-step-forward"></i></button>
+		  <button type="button" id="id_btn_last_ball" class="btn btn-success btn-circle cls_btn_over_navigators"><i class="glyphicon glyphicon glyphicon-fast-forward"></i></button>
+		</div>
+		
+		</div>	
+		<div class="clearfix"></div>
+		<hr style="margin: 5px 0 5px 0" />
+		
+		<div class="">
+			
+			<div class="dropdown form-group scoreDrpGroup">
+			  <button class="btn btn-primary dropdown-toggle cls_scorecard_bowlers_btn" value="" type="button" data-toggle="dropdown">
+				  <span>Bowler</span>
+			  <span class="caret"></span></button>
+			  <ul class="dropdown-menu cls_scorecard_bowlers">
+				
+			  </ul>
+			</div>
+
+
+			<div class="dropdown form-group scoreDrpGroup">
+			  <button class="btn btn-primary dropdown-toggle cls_scorecard_batsman_btn" value="" type="button" data-toggle="dropdown">
+				  <span>Batsman</span>
+			  <span class="caret"></span></button>
+			  <ul class="dropdown-menu cls_scorecard_batsman">
+				
+			  </ul>
+			</div>
+			
+			
+			
+		</div>
+		
+		<div class="clearfix"></div>
+		
+		<hr style="margin: 5px 0 5px 0" />
+		
+		<div class="btn-group">
+		
+			<div class="dropdown form-group scoreDrpGroup">
+				<button type="button" id="id_scored_runs_0" class="btn btn-primary btn-circle cls_runs_btn cls_selected" value="0"><span>0</span></button>
+			</div>
+			
+			<div class="dropdown form-group scoreDrpGroup">
+				<button type="button"  id="id_scored_runs_1" class="btn btn-primary btn-circle cls_runs_btn" value="1"><span>1</span></button>
+			</div>
+			
+			<div class="dropdown form-group scoreDrpGroup">
+				<button type="button"   id="id_scored_runs_2" class="btn btn-primary btn-circle cls_runs_btn" value="2"><span>2</span></button>
+			</div>
+			
+			<div class="dropdown form-group scoreDrpGroup">
+				<button type="button"  id="id_scored_runs_3" class="btn btn-primary btn-circle cls_runs_btn" value="3"><span>3</span></button>
+			</div>
+			
+			<div class="dropdown form-group scoreDrpGroup">
+				<button type="button"  id="id_scored_runs_4" class="btn btn-primary btn-circle cls_runs_btn" value="4"><span>4</span></button>
+			</div>
+			
+			<div class="dropdown form-group scoreDrpGroup">
+				<button type="button"  id="id_scored_runs_6" class="btn btn-primary btn-circle cls_runs_btn" value="6"><span>6</span></button>
+			</div>
+			
+		</div>
+		
+		<div class="clearfix"></div>
+		
+		<div>
+			
+			<div class="dropdown form-group scoreDrpGroup">
+			  <button class="btn btn-primary dropdown-toggle cls_scorecard_reason_dismissed_btn btn-xs" value="" type="button" data-toggle="dropdown">
+				  <span>Dismissal</span>
+			  <span class="caret"></span></button>
+			  <ul class="dropdown-menu cls_scorecard_reason_dismissed">
+				
+			  </ul>
+			</div>
+			
+			
+			<div class="dropdown form-group scoreDrpGroup">
+			  <button class="btn btn-primary dropdown-toggle cls_scorecard_batsman_dismissed_btn btn-xs" value="" type="button" data-toggle="dropdown">
+				  <span>Out</span>
+			  <span class="caret"></span></button>
+			  <ul class="dropdown-menu cls_scorecard_batsman_dismissed">
+				
+			  </ul>
+			</div>
+			
+			
+			
+			<div class="dropdown form-group scoreDrpGroup">
+			  <button class="btn btn-primary dropdown-toggle cls_scorecard_dismissal_assist_btn btn-xs" value="" type="button" data-toggle="dropdown">
+				  <span>Assi</span>
+			  <span class="caret"></span></button>
+			  <ul class="dropdown-menu cls_scorecard_dismissal_assist">
+				
+			  </ul>
+			</div>
+			
+			
+		</div>
+		<div class="clearfix"></div>
+		<div class="dropdown form-group scoreDrpGroup cls_submit_buttons_div">
+			<input type="hidden" id="id_hid_match_id" val="">
+			<input type="hidden" id="id_hid_team_id" val="">
+			<button  style="" type="button" id="id_btn_save_a_drop" class="btn btn-success btn-circle cls_btn_save_valid"><i class="glyphicon glyphicon-plus"></i></button>
+			
+			<div class="cls_this_over">
+				<span id="id_this_over_1"></span>
+				<span id="id_this_over_2"></span>
+				<span id="id_this_over_3"></span>
+				<span id="id_this_over_4"></span>
+				<span id="id_this_over_5"></span>
+				<span id="id_this_over_6"></span>
+			</div>
+			
+			<button style="float:right" type="button" id="id_btn_end_game" class="btn btn-success btn-circle"><i class="glyphicon glyphicon glyphicon-ok"></i></button>
+			
+		</div>
+		
+		<div class="clearfix"></div>
+         <div class="table-responsive">
+         
+         <div><strong>Team B</strong><span> Total : </span> <span id="id_tema_b_total_runs"></span> <span> Overs : </span> <span id="id_tema_b_total_overs"></span> <span> Bal.Overs : </span> <span id="id_tema_b_balance_overs"></span> <span id="id_tema_b_game_status"></span></div>
+		 <table class="table table-striped">
+			<thead>
+			  
+			</thead>
+			<tbody id="id_score_match_list_container_B">
+			  
+			  
+			</tbody>
+		 </table>
+		 <div id="id_score_match_bowlers_list_container_B">
+		 
+		 </div>
+		 <div class="clearfix"></div>
+		 <div style="padding-bottom:20px"></div>
+         <div><strong>Team A</strong><span> Total : </span> <span id="id_tema_a_total_runs"></span> <span> Overs : </span> <span id="id_tema_a_total_overs"></span> <span> Bal.Overs : </span> <span id="id_tema_a_balance_overs"></span> <span id="id_tema_a_game_status"></span></div>
+         <table class="table table-striped">
+			<thead>
+			  
+			</thead>
+			<tbody id="id_score_match_list_container_A">
+			  
+			  
+			</tbody>
+		 </table>
+		 <div id="id_score_match_bowlers_list_container_A">
+		 
+		 </div>
+		 
+		 
+		 </div>
+    </div>
+
+
+    <div class="container pageItem" id="matches">
+        <div class="page-header">
+          <h1>Matches</h1>
+        </div>
+        <div class="form-group">
+			<button type="button" id="id_btn_new_match" class="btn btn-primary">Add New Match</button>
+			<button type="button" id="id_btn_clear_match_all" class="btn btn-primary">Clear All</button>
+        </div>
+         <div class="table-responsive">
+         <table class="table table-striped">
+			<thead>
+			  <tr>
+				<th>SI</th>
+				<th>Match</th>
+				<th></th>
+			  </tr>
+			</thead>
+			<tbody id="id_match_list_container">
+			  
+			</tbody>
+		 </table>
+		 </div>
+    </div>
+
+
+	<div class="container pageItem" id="new_match">
+        <div class="page-header">
+          <h1>New Match</h1>
+        </div>
+        <div>
+		      <div class="form-group">
+				  <label for="id_match_new_name">Match Name:</label>
+				  <span class="form-control" id="id_match_new_name"></span>
+			  </div>
+			  <div class="form-group">
+				  <label for="id_match_new_num_innings">Number of innings:</label>
+				  <select class="form-control" id="id_match_new_num_innings">
+					<option value="1">1</option>
+					<option selected value="2">2</option>
+				  </select>
+			  </div>
+			  <div class="form-group">
+				  <label for="id_match_new_num_overs">Number of overs:</label>
+				  <select class="form-control" id="id_match_new_num_overs">
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+					<option value="4">4</option>
+					<option value="5">5</option>
+					<option value="6">6</option>
+					<option value="7">7</option>
+					<option value="8">8</option>
+					<option value="9">9</option>
+					<option value="10">10</option>
+					<option value="11">11</option>
+					<option value="12">12</option>
+					<option value="13">13</option>
+					<option value="14">14</option>
+					<option selected value="15">15</option>
+					<option value="16">16</option>
+					<option value="17">17</option>
+					<option value="18">18</option>
+					<option value="19">19</option>
+					<option value="20">20</option>
+					<option value="21">21</option>
+					<option value="22">22</option>
+					<option value="23">23</option>
+					<option value="24">24</option>
+					<option value="25">25</option>
+				  </select>
+			  </div>
+			  <div class="checkbox">
+				  <label><input type="checkbox" id="id_match_new_carry_overs_bool" checked value="">carry forward overs ?</label>
+			  </div>
+			  <div class="form-group"> 
+				<label for="id_match_new_team_a">Batting Team</label>
+				<button  style="width: 20px;    padding: 2px 0;height: 20px;" type="button" id="id_btn_swap_team" class="btn btn-success btn-xs btn-circle cls_btn_swap_team"><i class="glyphicon glyphicon-refresh"></i></button>
+				<select id="id_match_new_team_a" multiple="multiple">
+					
+				</select>
+			  </div>
+			  <div class="form-group">
+				<label for="id_match_new_team_b">Fielding Team</label>
+				<select id="id_match_new_team_b" multiple="multiple">
+
+				</select>
+			  </div>
+			  <div class="form-group">
+				<input type="hidden" val="" id="id_hid_match_id" />
+				<button type="button" id="id_btn_new_match_submit" class="btn btn-success">Start the Game</button>
+			  </div>
+		</div>
+    </div>
+
+    
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jasny-bootstrap.min.js"></script>
+    <script src="js/crics.js"></script>
+    <script src="js/bootstrap-multiselect.js"></script>
+    
+  </body>
+</html>

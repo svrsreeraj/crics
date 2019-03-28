@@ -1,0 +1,164 @@
+.leftMenuItem a 
+{
+cursor: pointer;
+}
+
+.cls_scorecard_innings_btn
+{
+min-width: 100px;
+}
+
+.scoreDrpGroup
+{
+ float:left;
+ margin: 0 5px 10px 5px;
+}
+
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 25px;
+}
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 25px;
+}
+.btn-circle.btn-xl {
+  width: 70px;
+  height: 70px;
+  padding: 10px 16px;
+  font-size: 24px;
+  line-height: 1.33;
+  border-radius: 35px;
+}
+.cls_runs_btn{
+	background-color: grey;
+    border-color: grey;
+}
+
+.cls_runs_btn_active {
+	background-color: #337ab7 !important;
+    border-color: #337ab7 !important;
+}
+button.cls_selected {
+	font-weight:bold;
+	background-color: #337ab7 !important;
+    border-color: #337ab7 !important;
+
+}
+.cls_btn_save_invalid {
+	
+	background-color: grey !important;
+    border-color: grey !important;
+}
+
+.cls_btn_save_valid {
+	
+	background-color: green !important;
+    border-color: green !important;
+}
+.cls_card_bowler_data {
+ float: left;
+ margin : 0px 5px 0px 5px;
+}
+
+#id_tema_a_total_runs, #id_tema_b_total_runs{
+
+font-weight:bold;
+color : black;
+
+}
+
+#id_tema_a_total_overs, #id_tema_b_total_overs{
+
+font-weight:bold;
+color : green;
+
+}
+
+#id_tema_a_game_status, #id_tema_b_game_status	{
+
+color:red;
+
+}
+
+.pageItem {
+
+padding-bottom : 70px;
+
+}
+.cls_submit_buttons_div	{
+width:100%;
+
+}
+
+.cls_submit_buttons_div button	{
+float : left;
+margin-right : 10px;
+width : 60px;
+height : 60px;
+}
+.cls_btn_invalid {
+	
+	background-color: grey !important;
+    border-color: grey !important;
+}
+
+.cls_btn_valid {
+	
+	background-color: #d9534f !important;
+    border-color: #d9534f !important;
+}
+
+.cls_this_over	{
+    float: left;
+    margin: 6px 0;
+    padding-left: 8px;
+}
+
+.cls_this_over span {
+	font-size: 18px;
+    font-weight: bold;
+    padding-right: 16px;
+    color : #d9534f;
+}
+
+.cls_btn_over_navigators	{
+ 
+ float:left;
+ margin : 0 6px;
+ 
+}
+.cls_layer_drama {
+
+	background : white;
+	position:absolute;
+	width:100%;
+	display:none;
+
+}
+
+.cls_layer_drama img {
+
+	border:0;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top:5px;
+
+}
+
+#id_str_drama_layer{
+	text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #DAA520;
+}
