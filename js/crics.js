@@ -9,8 +9,9 @@
         cricApp.players = {},
             cricApp.users = [];
         cricApp.loadedMatch = null;
-        cricApp.syncURL = "http://www.aslrp.com/cricket/admin/admin/json_sync";
-        //cricApp.syncURL = "http://192.168.0.29/cricket/index.php/admin/json_sync";
+        // cricApp.syncURL = "http://www.aslrp.com/cricket/admin/admin/json_sync";
+        // cricApp.syncURL = "http://192.168.0.29/cricket/index.php/admin/json_sync";
+        cricApp.syncURL = "http://93.188.164.225:9999/admin/json_sync";
 
         //batting status object
         cricApp.battingStatus = {
@@ -79,7 +80,7 @@
         cricApp.updateMatch = function (id, overs, innings, carryForward, isFollowingOn, teamA, teamB, callback) {
 
             cricApp.db.transaction(function (tx) {
-                tx.executeSql("update matches set overs=?, innings=?, carry_forward_overs=?, is_following_on=? team_a = ?, team_b=? where id = ?",
+                tx.executeSql("update matches set overs=?, innings=?, carry_forward_overs=?, is_following_on=?, team_a = ?, team_b=? where id = ?",
                     [overs, innings, carryForward, isFollowingOn, teamA, teamB, id], function success(tx, results) {
                         if (callback) {
                             callback(true)
@@ -639,7 +640,6 @@
             cricApp.loadPlayers();
         }
         cricApp.FinishTeamsPlay = function (singleDrop, callback) {
-
             cricApp.db.transaction(function (tx) {
                 tx.executeSql('SELECT * FROM innings where innings_number = ? and match_id = ? and team_id = ?  order by id desc limit 1',
                     [singleDrop.innings, singleDrop.matchId, singleDrop.teamId], function (tx, results) {
@@ -871,6 +871,50 @@
             return bestPlayers;
 
         };
+
+        cricApp.isGameOver = function (matchId, callback) {
+            cricApp.loadInnings(cricApp.matches[matchId][0].match, function (scoreCard) {
+                var firstInnings = scoreCard[0];
+                var match = firstInnings.match;
+                if (match.innings === 1) {
+                    callback(firstInnings.isInningsOver === true);
+                    return;
+                }
+
+                var secondInnings = scoreCard[1];
+                var teamATotal = firstInnings.teamA.totalRuns + secondInnings.teamA.totalRuns;
+                var teamBTotal = firstInnings.teamB.totalRuns + secondInnings.teamB.totalRuns;
+
+
+                if (!firstInnings.isInningsOver) {
+                    callback(false); return;
+                }
+                if (secondInnings.isInningsOver) {
+                    callback(true); return;
+                }
+
+                if (!secondInnings.teamA.isTeamInningsOver && !secondInnings.teamB.isTeamInningsOver) {
+                    callback(false); return;
+                }
+                if (match.is_following_on) {
+                    if (secondInnings.teamA.isTeamInningsOver) {
+                        callback(true); return;
+                    }
+                    if (teamBTotal < teamATotal) {
+                        callback(true); return;
+                    }
+                }
+                else {
+                    if (secondInnings.teamB.isTeamInningsOver) {
+                        callback(true); return;
+                    }
+                    if (teamBTotal > teamATotal) {
+                        callback(true); return;
+                    }
+                }
+                callback(false); return;
+            });
+        };
         cricApp.UI = {
 
             _html_scorecard_batsman: '<tr> <td>_cricApp_batsman_</td> <td>_cricApp_bating_status_ <span>_cricApp_assist_</span></td> <td><span>_cricApp_bowler_</span></td> <td><strong><span>_cricApp_batsman_runs_</span></strong>(<span>_cricApp_batsman_balls_</span>) <td><span>_cricApp_batsman_edit_</span></td></tr>	  <tr><td colspan="3"><span>6s:<span class="cls_scorecard_denomination_6">_cricApp_batsman_6s_</span> 4s:<span class="cls_scorecard_denomination_4">_cricApp_batsman_4s_</span> 3s:<span class="cls_scorecard_denomination_3">_cricApp_batsman_3s_</span> 2s:<span class="cls_scorecard_denomination_2">_cricApp_batsman_2s_</span> 1s:<span class="cls_scorecard_denomination_1">_cricApp_batsman_1s_</span> 0s:<span class="cls_scorecard_denomination_0">_cricApp_batsman_0s_</span></span></td><td colspan="2">SR : <span>_cricApp_batsman_strike_rate</span></td></tr>',
@@ -1065,20 +1109,19 @@
                 });
                 $('body').on('click', '#id_btn_end_game', function (e) {
                     alert("This will end the team's bating");
+                    var drop = cricApp.UI.getOneDropFromUI();
                     if (confirm("Are you sure ? ")) {
-                        var drop = cricApp.UI.getOneDropFromUI();
-                        var mom = cricApp.getManOfTheMatch(drop.matchId);
-                        cricApp.UI.showDramalayer("mom", cricApp.getMomString(mom), function () {
-                            if (parseInt(drop.innings) > 1 && parseInt(drop.teamId) > 1) {
-                                cricApp.FinishTeamsPlay(drop, function () {
-                                    cricApp.loadScoreCard(drop.matchId, drop.innings);
+                        cricApp.FinishTeamsPlay(drop, function () {
+                            cricApp.isGameOver(drop.matchId, function (over) {
+                                cricApp.loadScoreCard(drop.matchId, drop.innings);
+                                if(!over){
+                                    return;
+                                }
+                                var mom = cricApp.getManOfTheMatch(drop.matchId);
+                                cricApp.UI.showDramalayer("mom", cricApp.getMomString(mom), function () {
+
                                 });
-                            }
-                            else {
-                                cricApp.FinishTeamsPlay(drop, function () {
-                                    cricApp.loadScoreCard(drop.matchId, drop.innings);
-                                });
-                            }
+                            })
                         });
                     }
                 });
@@ -1253,6 +1296,12 @@
                 }
                 else {
                     $("#id_match_new_carry_overs_bool").prop('checked', false);
+                }
+                if (match.is_following_on === 1) {
+                    $("#id_match_is_following_on_bool").prop('checked', true);
+                }
+                else {
+                    $("#id_match_is_following_on_bool").prop('checked', false);
                 }
                 $('#id_match_new_team_a, #id_match_new_team_b').html('');
                 var teamAplayers = match.team_a.split(",");
