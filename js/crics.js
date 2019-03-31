@@ -7,23 +7,23 @@
         cricApp.db = openDatabase(cricApp.databaseName, "1", cricApp.databaseName, 5 * 1024 * 1024);
         cricApp.matches = {};
         cricApp.players = {},
-        cricApp.users = [];
+            cricApp.users = [];
         cricApp.loadedMatch = null;
         cricApp.syncURL = "http://www.aslrp.com/cricket/admin/admin/json_sync";
         //cricApp.syncURL = "http://192.168.0.29/cricket/index.php/admin/json_sync";
-        
+
         //batting status object
         cricApp.battingStatus = {
-            "1": {"status": "Not Out", "id": "5", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0},
-            "2": {"status": "Did not bat", "id": "4", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0},
-            "3": {"status": "Stump", "id": "3", "bowlerCredit": 1, "bowlerPoints": 5, "assistPoints": 4},
-            "4": {"status": "Catch", "id": "2", "bowlerCredit": 1, "bowlerPoints": 4, "assistPoints": 4},
-            "5": {"status": "Bowled", "id": "1", "bowlerCredit": 1, "bowlerPoints": 6, "assistPoints": 0},
-            "6": {"status": "Hitout", "id": "7", "bowlerCredit": 1, "bowlerPoints": 4, "assistPoints": 0},
-            "7": {"status": "Runout", "id": "6", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 4},
-            "8": {"status": "Hit wicket", "id": "8", "bowlerCredit": 1, "bowlerPoints": 5, "assistPoints": 0},
-            "9": {"status": "Retired hurt", "id": "9", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0},
-            "10": {"status": "LBW", "id": "10", "bowlerCredit": 1, "bowlerPoints": 6, "assistPoints": 0},
+            "1": { "status": "Not Out", "id": "5", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0 },
+            "2": { "status": "Did not bat", "id": "4", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0 },
+            "3": { "status": "Stump", "id": "3", "bowlerCredit": 1, "bowlerPoints": 5, "assistPoints": 4 },
+            "4": { "status": "Catch", "id": "2", "bowlerCredit": 1, "bowlerPoints": 4, "assistPoints": 4 },
+            "5": { "status": "Bowled", "id": "1", "bowlerCredit": 1, "bowlerPoints": 6, "assistPoints": 0 },
+            "6": { "status": "Hitout", "id": "7", "bowlerCredit": 1, "bowlerPoints": 4, "assistPoints": 0 },
+            "7": { "status": "Runout", "id": "6", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 4 },
+            "8": { "status": "Hit wicket", "id": "8", "bowlerCredit": 1, "bowlerPoints": 5, "assistPoints": 0 },
+            "9": { "status": "Retired hurt", "id": "9", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0 },
+            "10": { "status": "LBW", "id": "10", "bowlerCredit": 1, "bowlerPoints": 6, "assistPoints": 0 },
         }
         cricApp.initiateDatabase = function () {
 
@@ -31,7 +31,7 @@
                 //tx.executeSql("drop table innings", []);
                 //tx.executeSql("drop table matches", []);
                 tx.executeSql("CREATE TABLE IF NOT EXISTS players(id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER UNIQUE, name VARCHAR)", []);
-                tx.executeSql("CREATE TABLE IF NOT EXISTS matches(id INTEGER PRIMARY KEY AUTOINCREMENT, match_name VARCHAR,overs INTEGER, innings INTEGER, carry_forward_overs INTEGER, team_a VARCHAR, team_b VARCHAR, completed INTEGER, synced INTEGER)", []);
+                tx.executeSql("CREATE TABLE IF NOT EXISTS matches(id INTEGER PRIMARY KEY AUTOINCREMENT, match_name VARCHAR,overs INTEGER, innings INTEGER, carry_forward_overs INTEGER, is_following_on INTEGER, team_a VARCHAR, team_b VARCHAR, completed INTEGER, synced INTEGER)", []);
                 tx.executeSql("CREATE TABLE IF NOT EXISTS innings(id INTEGER PRIMARY KEY AUTOINCREMENT, innings_number INTEGER, match_id INTEGER, team_id INTEGER,batsman_id INTEGER,bowler_id INTEGER,over_count INTEGER,over_bowl_count INTEGER,runs INTEGER,dismisal_id INTEGER, wicket_to_bowler INTEGER, dismisl_type INTEGER, dismisal_assist_id INTEGER, team_innings_finished INTEGER)", []);
             });
         };
@@ -61,11 +61,11 @@
                 });
             });
         }
-        cricApp.insertMatch = function (name, overs, innings, carryForward, teamA, teamB, callback) {
+        cricApp.insertMatch = function (name, overs, innings, carryForward, isFollowingOn, teamA, teamB, callback) {
 
             cricApp.db.transaction(function (tx) {
-                tx.executeSql("INSERT INTO matches(match_name, overs, innings, carry_forward_overs, team_a, team_b, completed) VALUES (?,?,?,?,?,?,?)",
-                    [name, overs, innings, carryForward, teamA, teamB, 0], function success(tx, results) {
+                tx.executeSql("INSERT INTO matches(match_name, overs, innings, carry_forward_overs, is_following_on, team_a, team_b, completed) VALUES (?,?,?,?,?,?,?,?)",
+                    [name, overs, innings, carryForward, isFollowingOn, teamA, teamB, 0], function success(tx, results) {
                         if (callback) {
                             callback(results.insertId)
                         }
@@ -76,11 +76,11 @@
                     });
             });
         }
-        cricApp.updateMatch = function (id, overs, innings, carryForward, teamA, teamB, callback) {
+        cricApp.updateMatch = function (id, overs, innings, carryForward, isFollowingOn, teamA, teamB, callback) {
 
             cricApp.db.transaction(function (tx) {
-                tx.executeSql("update matches set overs=?, innings=?, carry_forward_overs=?, team_a = ?, team_b=? where id = ?",
-                    [overs, innings, carryForward, teamA, teamB, id], function success(tx, results) {
+                tx.executeSql("update matches set overs=?, innings=?, carry_forward_overs=?, is_following_on=? team_a = ?, team_b=? where id = ?",
+                    [overs, innings, carryForward, isFollowingOn, teamA, teamB, id], function success(tx, results) {
                         if (callback) {
                             callback(true)
                         }
@@ -137,7 +137,7 @@
                     $.ajax({
                         type: "POST",
                         url: cricApp.syncURL,
-                        data: {"data": JSON.stringify(cricApp.matches[id])},
+                        data: { "data": JSON.stringify(cricApp.matches[id]) },
                         success: function (data) {
                             if (data === "1") {
                                 cricApp.db.transaction(function (tx) {
@@ -176,7 +176,7 @@
                 case "A":
                     cricAppMatch.firstBatting = "A"
                     break;
-                case"B":
+                case "B":
                     cricAppMatch.firstBatting = "A"
                     break;
                 default:
@@ -201,13 +201,13 @@
                 case "players":
                     cricApp.loadPlayers(param);
                     break;
-                case"matches":
+                case "matches":
                     cricApp.loadMatches(param);
                     break;
-                case"new_match":
+                case "new_match":
                     cricApp.loadNewMatch(param);
                     break;
-                case"match_score_card":
+                case "match_score_card":
                     cricApp.loadScoreCard(param);
                     break;
             }
@@ -782,7 +782,7 @@
                 }
             }
             else if (parseInt(drop.runs) === 4) {
-                //cricApp.UI.showDramalayer("four");
+                cricApp.UI.showDramalayer("four");
             }
             else if (parseInt(drop.runs) === 6) {
                 cricApp.UI.showDramalayer("six");
@@ -859,10 +859,10 @@
                     if (players[key] >= tempMaxPoints) {
 
                         if (players[key] === tempMaxPoints) {
-                            bestPlayers.push({player: key, points: players[key]});
+                            bestPlayers.push({ player: key, points: players[key] });
                         }
                         else {
-                            bestPlayers = [{player: key, points: players[key]}];
+                            bestPlayers = [{ player: key, points: players[key] }];
                         }
                         tempMaxPoints = players[key];
                     }
@@ -873,7 +873,7 @@
         };
         cricApp.UI = {
 
-            _html_scorecard_batsman: '<tr> <td>_cricApp_batsman_</td> <td>_cricApp_bating_status_ <span>_cricApp_assist_</span></td> <td><span>_cricApp_bowler_</span></td> <td><strong><span>_cricApp_batsman_runs_</span></strong>(<span>_cricApp_batsman_balls_</span>) <td><span>_cricApp_batsman_edit_</span></td></tr>	  <tr><td colspan="3"><span>6s:_cricApp_batsman_6s_, 4s:_cricApp_batsman_4s_, 3s:_cricApp_batsman_3s_, 2s:_cricApp_batsman_2s_, 1s:_cricApp_batsman_1s_, 0s:_cricApp_batsman_0s_</span></td><td colspan="2">SR : <span>_cricApp_batsman_strike_rate</span></td></tr>',
+            _html_scorecard_batsman: '<tr> <td>_cricApp_batsman_</td> <td>_cricApp_bating_status_ <span>_cricApp_assist_</span></td> <td><span>_cricApp_bowler_</span></td> <td><strong><span>_cricApp_batsman_runs_</span></strong>(<span>_cricApp_batsman_balls_</span>) <td><span>_cricApp_batsman_edit_</span></td></tr>	  <tr><td colspan="3"><span>6s:<span class="cls_scorecard_denomination_6">_cricApp_batsman_6s_</span> 4s:<span class="cls_scorecard_denomination_4">_cricApp_batsman_4s_</span> 3s:<span class="cls_scorecard_denomination_3">_cricApp_batsman_3s_</span> 2s:<span class="cls_scorecard_denomination_2">_cricApp_batsman_2s_</span> 1s:<span class="cls_scorecard_denomination_1">_cricApp_batsman_1s_</span> 0s:<span class="cls_scorecard_denomination_0">_cricApp_batsman_0s_</span></span></td><td colspan="2">SR : <span>_cricApp_batsman_strike_rate</span></td></tr>',
             _html_scorecard_bowler: '<div class="cls_card_bowler_data">_cricApp_bowler_data_</div>',
 
             init: function () {
@@ -980,18 +980,20 @@
                     var numInnings = $("#id_match_new_num_innings").val();
                     var numOvers = $("#id_match_new_num_overs").val();
                     var carryOvers = $("#id_match_new_carry_overs_bool").is(":checked");
+                    var isFollowingOn = $("#id_match_is_following_on_bool").is(":checked");
                     var teamA = $("#id_match_new_team_a").val();
                     var teamB = $("#id_match_new_team_b").val();
                     var updateId = $("#id_hid_match_id").val();
                     carryOvers = carryOvers ? 1 : 0;
+                    isFollowingOn = isFollowingOn ? 1 : 0;
                     if (matchName.length > 1 && parseInt(numInnings) > 0 && parseInt(numOvers) > 0 && teamA && teamB && teamA.length > 1 && teamB.length > 1) {
                         if (updateId === "") {
-                            cricApp.insertMatch(matchName, numOvers, numInnings, carryOvers, teamA, teamB, function (insertedId) {
+                            cricApp.insertMatch(matchName, numOvers, numInnings, carryOvers, isFollowingOn, teamA, teamB, function (insertedId) {
                                 cricApp.UI.showPage("matches", false);
                             });
                         }
                         else {
-                            cricApp.updateMatch(updateId, numOvers, numInnings, carryOvers, teamA, teamB, function (isUpdated) {
+                            cricApp.updateMatch(updateId, numOvers, numInnings, carryOvers, isFollowingOn, teamA, teamB, function (isUpdated) {
                                 cricApp.UI.showPage("matches", false);
                             });
                         }
@@ -1066,20 +1068,18 @@
                     if (confirm("Are you sure ? ")) {
                         var drop = cricApp.UI.getOneDropFromUI();
                         var mom = cricApp.getManOfTheMatch(drop.matchId);
-                        if (parseInt(drop.innings) > 1 && parseInt(drop.teamId) > 1) {
-                            cricApp.UI.showDramalayer("mom", cricApp.getMomString(mom), function () {
+                        cricApp.UI.showDramalayer("mom", cricApp.getMomString(mom), function () {
+                            if (parseInt(drop.innings) > 1 && parseInt(drop.teamId) > 1) {
                                 cricApp.FinishTeamsPlay(drop, function () {
                                     cricApp.loadScoreCard(drop.matchId, drop.innings);
                                 });
-                            });
-                        }
-                        else {
-                            cricApp.FinishTeamsPlay(drop, function () {
-                                cricApp.loadScoreCard(drop.matchId, drop.innings);
-                            });
-                        }
-
-
+                            }
+                            else {
+                                cricApp.FinishTeamsPlay(drop, function () {
+                                    cricApp.loadScoreCard(drop.matchId, drop.innings);
+                                });
+                            }
+                        });
                     }
                 });
                 $('body').on('click', '#id_btn_clear_match_all', function (e) {
@@ -1489,6 +1489,22 @@
                     battingTeam = inningsScoreCard.teamB;
                     bowlingTeam = inningsScoreCard.teamA;
                 }
+
+                //followOn
+                if (match.is_following_on && inningsNum === 2) {
+                    if (inningsScoreCard.teamB.isTeamInningsOver) {
+                        teamId = 1;
+                        battingTeam = inningsScoreCard.teamA;
+                        bowlingTeam = inningsScoreCard.teamB;
+                    }
+                    else {
+                        teamId = 2;
+                        battingTeam = inningsScoreCard.teamB;
+                        bowlingTeam = inningsScoreCard.teamA;
+                    }
+                }
+
+
                 cricApp.UI.calculateScoresAndLabels(scoreCard, inningsScoreCard, inningsNum, teamId);
                 if (parseInt(lastUpdatedBall) >= 0 && parseInt(lastUpdatedBall) !== parseInt(battingTeam.totalPlayedBalls)) {
                     cricApp.UI.renderThisOver(battingTeam.drops);
@@ -1906,23 +1922,51 @@
                     var teamATotal = inningsScoreCard.teamA.totalRuns + scoreCard[inningsNum - 2].teamA.totalLead;
                     var teamBTotal = inningsScoreCard.teamB.totalRuns + scoreCard[inningsNum - 2].teamB.totalLead;
 
-                    if (teamId === 1) {
-                        if (teamATotal > teamBTotal) {
-                            teamAmatchStatus = "Lead By" + (teamATotal - teamBTotal);
+                    if (!inningsScoreCard.match.is_following_on) {
+                        if (teamId === 1) {
+                            if (teamATotal > teamBTotal) {
+                                teamAmatchStatus = "Lead By" + (teamATotal - teamBTotal);
+                            }
+                            else {
+                                if (teamATotal < teamBTotal && inningsScoreCard.teamA.isTeamInningsOver) {
+                                    teamBmatchStatus = "Won !!";
+                                }
+                                teamAmatchStatus = "Trail By " + (teamBTotal - teamATotal);
+                            }
                         }
                         else {
-                            teamAmatchStatus = "Trail By " + (teamBTotal - teamATotal);
+                            if (teamBTotal > teamATotal) {
+                                teamBmatchStatus = "Won !!";
+                            }
+                            else {
+                                teamBmatchStatus = (teamATotal - teamBTotal + 1) + " more runs to win. ";
+                            }
+                            teamAmatchStatus = "Grand Total : " + (teamATotal);
                         }
                     }
                     else {
-                        if (teamBTotal > teamATotal) {
-                            teamBmatchStatus = "Won !!";
+                        if (teamId === 2) {
+                            if (teamBTotal > teamATotal) {
+                                teamBmatchStatus = "Lead By" + (teamBTotal - teamATotal);
+                            }
+                            else {
+                                if (teamBTotal < teamATotal && inningsScoreCard.teamA.isTeamInningsOver) {
+                                    teamAmatchStatus = "Won !!";
+                                }
+                                teamBmatchStatus = "Trail By " + (teamATotal - teamBTotal);
+                            }
                         }
                         else {
-                            teamBmatchStatus = (teamATotal - teamBTotal + 1) + " more runs to win. ";
+                            if (teamATotal > teamBTotal) {
+                                teamAmatchStatus = "Won !!";
+                            }
+                            else {
+                                teamAmatchStatus = (teamBTotal - teamATotal + 1) + " more runs to win. ";
+                            }
+                            teamBmatchStatus = "Grand Total : " + (teamBTotal);
                         }
-                        teamAmatchStatus = "Grand Total : " + (teamATotal);
                     }
+
                 }
                 $("#id_tema_a_game_status").text(teamAmatchStatus);
                 $("#id_tema_b_game_status").text(teamBmatchStatus);
@@ -1934,16 +1978,16 @@
                     case "duck":
                         img = "images/duck.gif"
                         break;
-                    case"golden_duck":
+                    case "golden_duck":
                         img = "images/golden_duck.gif"
                         break;
-                    case"four":
+                    case "four":
                         img = "images/boundry.gif"
                         break;
-                    case"six":
+                    case "six":
                         img = "images/boundry.gif"
                         break;
-                    case"mom":
+                    case "mom":
                         img = "images/mom.jpg"
                         break;
                 }
