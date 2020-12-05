@@ -665,7 +665,6 @@
             })
         }
         cricApp.loadPlayerRanking = function(match) {
-            debugger
             playersRankArr = []
             cricApp.getMatch(match, function (matchObject) {
                 cricApp.loadInnings(matchObject, function (scoreCard) {
@@ -1043,7 +1042,11 @@
                     var match = ($(this).attr('item'));
                     cricApp.UI.showPage("match_player_ranking", false, match);
                     return false;
-                    ;
+                });
+                $('body').on('click', '#id_btn_back_from_ranking', function (e) {
+                    var match = ($(this).attr('item'));
+                    cricApp.UI.showPage("matches", false)
+                    return false;
                 });
                 $('body').on('click', '.cls_edit_match', function (e) {
                     var match = ($(this).attr('item'));
@@ -1343,7 +1346,7 @@
                         '" class="btn btn-warning btn-xs cls_copy_match">Copy Match</button> &nbsp;<button type="button"  item="' +
                         matches.item(i).id + '" class="btn btn-danger btn-xs cls_delete_match">Delete</button>  &nbsp;<button type="button"  item="' +
                         matches.item(i).id + '" class="btn btn-primary btn-xs cls_scorecard_match">Score Card</button>  &nbsp;<button type="button"  item="' +
-                        matches.item(i).id + '" class="btn btn-warning btn-xs cls_player_ranking">Player Ranking</button>  &nbsp;<button type="button"  item="' +
+                        matches.item(i).id + '" class="btn btn-warning btn-xs cls_player_ranking">Player Ranking</button>' +
                         completed + synced + '</td></tr>'
                     $("#id_match_list_container").append(trRow);
                 }
