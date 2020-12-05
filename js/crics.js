@@ -7,24 +7,31 @@
         cricApp.db = openDatabase(cricApp.databaseName, "1", cricApp.databaseName, 5 * 1024 * 1024);
         cricApp.matches = {};
         cricApp.players = {},
-            cricApp.users = [];
+        cricApp.users = [];
         cricApp.loadedMatch = null;
+        cricApp.POINTS = {
+            "EACH_RUN": 1,
+            "EACH_FOUR": 1,
+            "EACH_SIX": 2,
+            "EACH_THIRTY": 4,
+            "CHASING_FOR_VICTORY_ALONE": 3 //runs * CHASING_FOR_VICTORY_ALONE
+        }
         // cricApp.syncURL = "http://www.aslrp.com/cricket/admin/admin/json_sync";
         // cricApp.syncURL = "http://192.168.0.29/cricket/index.php/admin/json_sync";
         cricApp.syncURL = "http://93.188.164.225:9999/admin/json_sync";
 
         //batting status object
         cricApp.battingStatus = {
-            "1": { "status": "Not Out", "id": "5", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0 },
-            "2": { "status": "Did not bat", "id": "4", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0 },
-            "3": { "status": "Stump", "id": "3", "bowlerCredit": 1, "bowlerPoints": 5, "assistPoints": 4 },
-            "4": { "status": "Catch", "id": "2", "bowlerCredit": 1, "bowlerPoints": 4, "assistPoints": 4 },
-            "5": { "status": "Bowled", "id": "1", "bowlerCredit": 1, "bowlerPoints": 6, "assistPoints": 0 },
-            "6": { "status": "Hitout", "id": "7", "bowlerCredit": 1, "bowlerPoints": 4, "assistPoints": 0 },
-            "7": { "status": "Runout", "id": "6", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 4 },
-            "8": { "status": "Hit wicket", "id": "8", "bowlerCredit": 1, "bowlerPoints": 5, "assistPoints": 0 },
-            "9": { "status": "Retired hurt", "id": "9", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0 },
-            "10": { "status": "LBW", "id": "10", "bowlerCredit": 1, "bowlerPoints": 6, "assistPoints": 0 },
+            "1": {"status": "Not Out", "id": "5", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0},
+            "2": {"status": "Did not bat", "id": "4", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0},
+            "3": {"status": "Stump", "id": "3", "bowlerCredit": 1, "bowlerPoints": 10, "assistPoints": 6},
+            "4": {"status": "Catch", "id": "2", "bowlerCredit": 1, "bowlerPoints": 10, "assistPoints": 6},
+            "5": {"status": "Bowled", "id": "1", "bowlerCredit": 1, "bowlerPoints": 10, "assistPoints": 0},
+            "6": {"status": "Hitout", "id": "7", "bowlerCredit": 1, "bowlerPoints": 10, "assistPoints": 0},
+            "7": {"status": "Runout", "id": "6", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 3},
+            "8": {"status": "Hit wicket", "id": "8", "bowlerCredit": 1, "bowlerPoints": 10, "assistPoints": 0},
+            "9": {"status": "Retired hurt", "id": "9", "bowlerCredit": 0, "bowlerPoints": 0, "assistPoints": 0},
+            "10": {"status": "LBW", "id": "10", "bowlerCredit": 1, "bowlerPoints": 10, "assistPoints": 0},
         }
         cricApp.initiateDatabase = function () {
 
@@ -211,6 +218,11 @@
                 case "match_score_card":
                     cricApp.loadScoreCard(param);
                     break;
+                case "match_player_ranking":
+                    cricApp.loadPlayerRanking(param);
+                    break;
+
+
             }
         }
         cricApp.loadPlayers = function () {
@@ -417,15 +429,42 @@
                     }
                 }
 
-                this.calculatePoints = function (drop, otherTeam) {
-                    self.batsmen[drop.batsman_id].points += drop.runs;
-                    if (parseInt(drop.dismisal_id) > 0) {
-                        if (parseInt(drop.dismisl_type) !== 7 && parseInt(drop.dismisl_type) !== 9) {
-                            otherTeam.bowlers[drop.bowler_id].points += cricApp.battingStatus[parseInt(drop.dismisl_type)].bowlerPoints;
-
+                this.calculatePoints = function (drops, otherTeam ) {
+                    var chasingToWinWithLastWicket = false
+                    var lastMatchDismissedBatsmenCount = 0;
+                    for (i = 0; i < drops.length; i++) {
+                        var drop = drops[i];
+                        self.batsmen[drop.batsman_id].points += drop.runs * cricApp.POINTS["EACH_RUN"];
+                        if(drop.runs === 4) {
+                            self.batsmen[drop.batsman_id].points += cricApp.POINTS["EACH_FOUR"];
                         }
-                        if (parseInt(drop.dismisal_assist_id) > 0 && parseInt(drop.dismisl_type) > 0) {
-                            otherTeam.bowlers[drop.dismisal_assist_id].points += cricApp.battingStatus[parseInt(drop.dismisl_type)].assistPoints
+                        if(drop.runs === 6) {
+                            self.batsmen[drop.batsman_id].points += cricApp.POINTS["EACH_SIX"];
+                        }                    
+                        if (parseInt(drop.dismisal_id) > 0) {
+                            if (parseInt(drop.dismisl_type) !== 7 && parseInt(drop.dismisl_type) !== 9) {
+                                otherTeam.bowlers[drop.bowler_id].points += cricApp.battingStatus[parseInt(drop.dismisl_type)].bowlerPoints;
+
+                            }
+                            if (parseInt(drop.dismisal_assist_id) > 0 && parseInt(drop.dismisl_type) > 0) {
+                                otherTeam.bowlers[drop.dismisal_assist_id].points += cricApp.battingStatus[parseInt(drop.dismisl_type)].assistPoints
+                            }
+                        }
+                        //checking for chasing for victory single handedly
+                        if (otherTeam.isTeamInningsOver && ((_scoreCard_.match.innings === 2 && drop.innings_number === 2) || (_scoreCard_.match.innings === 1))) {
+                            if (!chasingToWinWithLastWicket) {
+                                var totalBatsmen = Object.keys(self.batsmen).length;
+                                if(parseInt(drop.dismisal_id) > 0) {
+                                    lastMatchDismissedBatsmenCount++;
+                                    if((totalBatsmen - lastMatchDismissedBatsmenCount) === 1) {
+                                        chasingToWinWithLastWicket = true
+                                    }
+                                }
+                            }
+                            else {
+                                self.batsmen[drop.batsman_id].points -= drop.runs * cricApp.POINTS["EACH_RUN"];
+                                self.batsmen[drop.batsman_id].points += drop.runs * cricApp.POINTS["CHASING_FOR_VICTORY_ALONE"];
+                            } 
                         }
                     }
                 }
@@ -439,7 +478,6 @@
                         if (!drop) {
                             continue;
                         }
-                        self.calculatePoints(drop, otherTeam);
                         self.totalPlayedBalls++;
                         self.totalRuns += drop.runs;
                         self.batsmen[drop.batsman_id].totalRuns += drop.runs;
@@ -565,6 +603,7 @@
 
                         }
                     }//loop ends
+                    self.calculatePoints(self.drops, otherTeam);
                     var boolLastRun = false;
                     if (lastRuns === 3 || lastRuns === 1) {
                         boolLastRun = true;
@@ -624,6 +663,31 @@
                 });
 
             })
+        }
+        cricApp.loadPlayerRanking = function(match) {
+            debugger
+            playersRankArr = []
+            cricApp.getMatch(match, function (matchObject) {
+                cricApp.loadInnings(matchObject, function (scoreCard) {
+                    playersRanking = cricApp.getPlayersPoints(match)
+                    var sortable = []
+                    for (var player in playersRanking) {
+                        sortable.push([player, playersRanking[player]]);
+                    }
+                    sortable.sort(function(a, b) {
+                        return b[1] - a[1];
+                    });
+                    sortable.forEach(element => {
+                        playersRankArr.push({
+                            "playerId" : element[0],
+                            "playerName" : cricApp.players[element[0]].name,
+                            "rank" : element[1]
+                        })
+                    });
+                    cricApp.UI.renderPlayerRanking(playersRankArr)
+                });
+            })
+            
         }
         cricApp.formattedDate = function () {
             var d = new Date(),
@@ -813,9 +877,31 @@
             return outputStrArr.join();
         }
         cricApp.getManOfTheMatch = function (matchId) {
+            var players = cricApp.getPlayersPoints(matchId);
+            var bestPlayers = [];
+            var tempMaxPoints = 0;
+            for (var key in players) {
+                if (players.hasOwnProperty(key)) {
+                    if (players[key] >= tempMaxPoints) {
+
+                        if (players[key] === tempMaxPoints) {
+                            bestPlayers.push({ player: key, points: players[key] });
+                        }
+                        else {
+                            bestPlayers = [{ player: key, points: players[key] }];
+                        }
+                        tempMaxPoints = players[key];
+                    }
+                }
+            }
+            return bestPlayers;
+
+        };
+
+        cricApp.getPlayersPoints = function (matchId) {
             var innings = cricApp.matches[matchId];
             var players = {};
-            var bestPlayers = [];
+           
             for (var i = 0; i < innings.length; i++) {
                 var currentInnings = innings[i];
 
@@ -853,24 +939,8 @@
                     }
                 }
             }
-            var tempMaxPoints = 0;
-            for (var key in players) {
-                if (players.hasOwnProperty(key)) {
-                    if (players[key] >= tempMaxPoints) {
-
-                        if (players[key] === tempMaxPoints) {
-                            bestPlayers.push({ player: key, points: players[key] });
-                        }
-                        else {
-                            bestPlayers = [{ player: key, points: players[key] }];
-                        }
-                        tempMaxPoints = players[key];
-                    }
-                }
-            }
-            return bestPlayers;
-
-        };
+            return players;
+        }
 
         cricApp.isGameOver = function (matchId, callback) {
             cricApp.loadInnings(cricApp.matches[matchId][0].match, function (scoreCard) {
@@ -966,6 +1036,12 @@
                 $('body').on('click', '.cls_scorecard_match', function (e) {
                     var match = ($(this).attr('item'));
                     cricApp.UI.showPage("match_score_card", false, match);
+                    return false;
+                    ;
+                });
+                $('body').on('click', '.cls_player_ranking', function (e) {
+                    var match = ($(this).attr('item'));
+                    cricApp.UI.showPage("match_player_ranking", false, match);
                     return false;
                     ;
                 });
@@ -1233,6 +1309,14 @@
                     $("#id_player_container").append(trRow);
                 }
             },
+            renderPlayerRanking: function (playersRanking) {
+                $("#id_player_ranking_container").html('');
+                var len = playersRanking.length, i;
+                for (i = 0; i < len; i++) {
+                    var trRow = '<tr><td>' + (i + 1) + '</td><td>' + playersRanking[i]["playerName"] + '</td><td>' + playersRanking[i]["rank"] + '</tr>'
+                    $("#id_player_ranking_container").append(trRow);
+                }
+            },
             renderMatches: function (matches) {
                 $("#id_match_list_container").html('');
                 var len = matches.length, i;
@@ -1258,7 +1342,9 @@
                         '" class="btn btn-warning btn-xs cls_edit_match">Edit</button> &nbsp;<button type="button"  item="' + matches.item(i).id +
                         '" class="btn btn-warning btn-xs cls_copy_match">Copy Match</button> &nbsp;<button type="button"  item="' +
                         matches.item(i).id + '" class="btn btn-danger btn-xs cls_delete_match">Delete</button>  &nbsp;<button type="button"  item="' +
-                        matches.item(i).id + '" class="btn btn-primary btn-xs cls_scorecard_match">Score Card</button> ' + completed + synced + '</td></tr>'
+                        matches.item(i).id + '" class="btn btn-primary btn-xs cls_scorecard_match">Score Card</button>  &nbsp;<button type="button"  item="' +
+                        matches.item(i).id + '" class="btn btn-warning btn-xs cls_player_ranking">Player Ranking</button>  &nbsp;<button type="button"  item="' +
+                        completed + synced + '</td></tr>'
                     $("#id_match_list_container").append(trRow);
                 }
             },
