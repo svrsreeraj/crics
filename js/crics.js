@@ -16,9 +16,8 @@
             "EACH_THIRTY": 4,
             "CHASING_FOR_VICTORY_ALONE": 3 //runs * CHASING_FOR_VICTORY_ALONE
         }
-        // cricApp.syncURL = "http://www.aslrp.com/cricket/admin/admin/json_sync";
-        // cricApp.syncURL = "http://192.168.0.29/cricket/index.php/admin/json_sync";
-        cricApp.syncURL = "http://93.188.164.225:9999/admin/json_sync";
+      
+        cricApp.syncURL = "";
 
         //batting status object
         cricApp.battingStatus = {
@@ -856,11 +855,13 @@
             ping.play()
         };
         cricApp.playForFour = function () {
-            var ping = new Audio("media/clap_small.mp3");
+            var fileName = "media/4/" + (Math.floor(Math.random() * 8) + 1) + ".mp3";
+            var ping = new Audio(fileName);
             ping.play()
         };
         cricApp.playForSix = function () {
-            var ping = new Audio("media/clap_small.mp3");
+            var fileName = "media/6/" + (Math.floor(Math.random() * 3) + 1) + ".mp3";
+            var ping = new Audio(fileName);
             ping.play()
         };
         cricApp.getMomString = function (momObjectArr) {
@@ -1197,6 +1198,9 @@
                                     return;
                                 }
                                 var mom = cricApp.getManOfTheMatch(drop.matchId);
+                                setTimeout(function() {
+                                    cricApp.UI.showPage("match_player_ranking", false, drop.matchId);
+                                }, 2000);
                                 cricApp.UI.showDramalayer("mom", cricApp.getMomString(mom), function () {
 
                                 });
@@ -1745,7 +1749,7 @@
                     else {
                         tempStr = tempStr.replace('_cricApp_assist_', '');
                     }
-                    if (batsmanObj.bowlerId > 0) {
+                    if (batsmanObj.bowlerId > 0 && batsmanObj.BattingStatus !== 7) {
                         tempStr = tempStr.replace('_cricApp_bowler_', 'B. ' + cricApp.players[batsmanObj.bowlerId].name);
                     }
                     else {
